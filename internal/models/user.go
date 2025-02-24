@@ -1,9 +1,11 @@
 package models
 
 import (
-	"fmt"
+	"gorm.io/gorm"
 )
 
-func User() {
-	fmt.Println("user.go")
+type User struct {
+	gorm.Model
+	Name  string `json:"name"`
+	Email string `json:"email" gorm:"uniqueIndex"`
 }
