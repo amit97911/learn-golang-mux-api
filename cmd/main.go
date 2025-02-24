@@ -13,7 +13,8 @@ import (
 
 func main() {
 	fmt.Println("main.go")
-	config.Config()
+	cfg := config.LoadConfig()
+	fmt.Println("PORT:", cfg.Port, " DB_URL:", cfg.DatabaseURL)
 	models.User()
 	repositories.UserRepository()
 	services.UserService()
