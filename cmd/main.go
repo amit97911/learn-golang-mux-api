@@ -10,7 +10,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	gorillaHandlers "github.com/gorilla/handlers"
+	gorillaMux "github.com/gorilla/mux"
 )
 
 func main() {
@@ -19,7 +20,7 @@ func main() {
 	service := services.NewUserService(repo)
 	handler := handlers.NewUserHandler(service)
 
-	router := mux.NewRouter()
+	router := gorillaMux.NewRouter()
 
 	userRouter := router.PathPrefix("/user").Subrouter()
 	userRouter.HandleFunc("/create", handler.CreateUser).Methods("POST")
@@ -34,7 +35,7 @@ func main() {
 
 	port := cfg.Port
 	log.Println("Server started on :" + port)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	log.Fatal(http.ListenAndServe(":"+port, gorillaHandlers.CORS()(router)))
 	middlewares.Middleware()
 	pkg.Utils()
 }
