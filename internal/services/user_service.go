@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"learn-golang-mux-api/internal/models"
 	"learn-golang-mux-api/internal/repositories"
 )
@@ -24,10 +25,10 @@ func (service *UserService) RegisterUser(name, email string) (*models.User, erro
 	return user, err
 }
 
-func (s *UserService) GetAllUsers() ([]models.User, error) {
+func (s *UserService) GetAllUsers() ([]*models.User, error) {
 	users, err := s.Repo.GetAllUsers()
 	if err != nil {
-		return nil, errors.New("failed to retrieve users")
+		return nil, fmt.Errorf("failed to retrieve users: %w", err)
 	}
 	return users, nil
 }
