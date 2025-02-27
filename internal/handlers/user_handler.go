@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserHandler struct {
@@ -20,22 +21,33 @@ func NewUserHandler(service *services.UserService) *UserHandler {
 // CreateUser handles user creation
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user struct {
-		Name  string `json:"name"`
-		Email string `json:"email"`
+		Name     string `json:"name"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
+	hash, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	user.Password = string(hash)
 
-	createdUser, err := h.Service.RegisterUser(user.Name, user.Email)
+	createdUser, err := h.Service.RegisterUser(user.Name, user.Email, user.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	json.NewEncoder(w).Encode(createdUser)
+	response := map[string]any{
+		"message": "User created",
+		"data": map[string]any{
+			"name":  createdUser.Name,
+			"email": createdUser.Email,
+		},
+	}
+	json.NewEncoder(w).Encode(response)
+
 }
 
 // GetUser retrieves a user by ID

@@ -15,12 +15,12 @@ func NewUserService(repo *repositories.UserRepository) *UserService {
 	return &UserService{Repo: repo}
 }
 
-func (service *UserService) RegisterUser(name, email string) (*models.User, error) {
-	if name == "" || email == "" {
+func (service *UserService) RegisterUser(name, email, password string) (*models.User, error) {
+	if name == "" || email == "" || password == "" {
 		return nil, errors.New("name and email are required")
 	}
 
-	user := &models.User{Name: name, Email: email}
+	user := &models.User{Name: name, Email: email, Password: password}
 	err := service.Repo.CreateUser(user)
 	return user, err
 }

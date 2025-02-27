@@ -23,8 +23,8 @@ func NewUserRepository(databaseUrl string) *UserRepository {
 }
 
 func (repo *UserRepository) CreateUser(user *models.User) error {
-	query := "INSERT INTO users (name, email) VALUES (?, ?)"
-	_, err := repo.DB.Exec(query, user.Name, user.Email)
+	query := "INSERT INTO users (name, email,password) VALUES (?, ?, ?)"
+	_, err := repo.DB.Exec(query, user.Name, user.Email, user.Password)
 	return err
 }
 

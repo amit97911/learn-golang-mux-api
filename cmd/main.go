@@ -21,8 +21,9 @@ func main() {
 	handler := handlers.NewUserHandler(service)
 
 	router := gorillaMux.NewRouter()
+	apiRouter := router.PathPrefix("/api").Subrouter()
 
-	userRouter := router.PathPrefix("/user").Subrouter()
+	userRouter := apiRouter.PathPrefix("/user").Subrouter()
 	userRouter.HandleFunc("/create", handler.CreateUser).Methods("POST")
 	userRouter.HandleFunc("/id/{id}", handler.GetUser).Methods("GET")
 	userRouter.HandleFunc("/all", handler.GetAllUsers).Methods("GET")
