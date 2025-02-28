@@ -22,17 +22,17 @@ func NewUserRepository(databaseUrl string) *UserRepository {
 	return &UserRepository{DB: db}
 }
 
-func (repo *UserRepository) CreateUser(user *models.User) error {
+func (repo *UserRepository) CreateUser(user *models.UserWithPasswordStruct) error {
 	query := "INSERT INTO users (name, email,password) VALUES (?, ?, ?)"
 	_, err := repo.DB.Exec(query, user.Name, user.Email, user.Password)
 	return err
 }
 
-func (repo *UserRepository) GetUser(id uint) (*models.User, error) {
+func (repo *UserRepository) GetUser(id uint) (*models.UserStruct, error) {
 	query := "SELECT id, name, email FROM users WHERE id = ?"
 	row := repo.DB.QueryRow(query, id)
 
-	user := models.User{}
+	user := models.UserStruct{}
 	err := row.Scan(&user.ID, &user.Name, &user.Email)
 	if err != nil {
 		return nil, err
@@ -40,16 +40,16 @@ func (repo *UserRepository) GetUser(id uint) (*models.User, error) {
 	return &user, nil
 }
 
-func (repo *UserRepository) GetAllUsers() ([]*models.User, error) {
+func (repo *UserRepository) GetAllUsers() ([]*models.UserStruct, error) {
 	query := "SELECT id, name, email FROM users"
 	rows, err := repo.DB.Query(query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var users []*models.User
+	var users []*models.UserStruct
 	for rows.Next() {
-		var user = &models.User{}
+		var user = &models.UserStruct{}
 		if err := rows.Scan(&user.ID, &user.Name, &user.Email); err != nil {
 			return users, err
 		}

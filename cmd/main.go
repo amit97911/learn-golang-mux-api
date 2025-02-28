@@ -16,17 +16,23 @@ import (
 
 func main() {
 	cfg := config.LoadConfig()
-	repo := repositories.NewUserRepository(cfg.DatabaseURL)
-	service := services.NewUserService(repo)
-	handler := handlers.NewUserHandler(service)
+	userRepo := repositories.NewUserRepository(cfg.DatabaseURL)
+	userService := services.UserService(userRepo)
+	userHandler := handlers.UserHandler(userService)
+
+	authService := services.AuthUserService(userRepo)
+	authHandler := handlers.AuthUserHandler(authService)
 
 	router := gorillaMux.NewRouter()
 	apiRouter := router.PathPrefix("/api").Subrouter()
 
+	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
+	authRouter.HandleFunc("/login", authHandler.Login).Methods("POST")
+
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
-	userRouter.HandleFunc("/create", handler.CreateUser).Methods("POST")
-	userRouter.HandleFunc("/id/{id}", handler.GetUser).Methods("GET")
-	userRouter.HandleFunc("/all", handler.GetAllUsers).Methods("GET")
+	userRouter.HandleFunc("/create", userHandler.CreateUser).Methods("POST")
+	userRouter.HandleFunc("/id/{id}", userHandler.GetUser).Methods("GET")
+	userRouter.HandleFunc("/all", userHandler.GetAllUsers).Methods("GET")
 
 	// Method Not Allowed Handler
 	router.MethodNotAllowedHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

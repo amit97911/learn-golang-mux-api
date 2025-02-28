@@ -7,25 +7,25 @@ import (
 	"learn-golang-mux-api/internal/repositories"
 )
 
-type UserService struct {
+type UserServiceStruct struct {
 	Repo *repositories.UserRepository
 }
 
-func NewUserService(repo *repositories.UserRepository) *UserService {
-	return &UserService{Repo: repo}
+func UserService(repo *repositories.UserRepository) *UserServiceStruct {
+	return &UserServiceStruct{Repo: repo}
 }
 
-func (service *UserService) RegisterUser(name, email, password string) (*models.User, error) {
+func (service *UserServiceStruct) RegisterUser(name, email, password string) (*models.UserWithPasswordStruct, error) {
 	if name == "" || email == "" || password == "" {
 		return nil, errors.New("name and email are required")
 	}
 
-	user := &models.User{Name: name, Email: email, Password: password}
+	user := &models.UserWithPasswordStruct{Name: name, Email: email, Password: password}
 	err := service.Repo.CreateUser(user)
 	return user, err
 }
 
-func (s *UserService) GetAllUsers() ([]*models.User, error) {
+func (s *UserServiceStruct) GetAllUsers() ([]*models.UserStruct, error) {
 	users, err := s.Repo.GetAllUsers()
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve users: %w", err)
