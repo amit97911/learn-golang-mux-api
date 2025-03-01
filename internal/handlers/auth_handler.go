@@ -7,16 +7,31 @@ import (
 )
 
 type AuthUserHandlerStruct struct {
-	Service *services.UserServiceStruct
+	Service *services.AuthServiceStruct
 }
 
-func AuthUserHandler(service *services.UserServiceStruct) *AuthUserHandlerStruct {
+func AuthUserHandler(service *services.AuthServiceStruct) *AuthUserHandlerStruct {
 	return &AuthUserHandlerStruct{Service: service}
 }
 
 func (h *AuthUserHandlerStruct) Login(w http.ResponseWriter, r *http.Request) {
-	response := map[string]any{
-		"message": "Flow Pending",
+	var userInput struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
-	json.NewEncoder(w).Encode(response)
+
+	if err := json.NewDecoder(r.Body).Decode(&userInput); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	_, err := h.Service.HandleLogin(userInput.Email, userInput.Password)
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Set a session or cookie here if needed
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode("Login successful")
 }

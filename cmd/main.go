@@ -14,13 +14,18 @@ import (
 	gorillaMux "github.com/gorilla/mux"
 )
 
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lmicroseconds | log.Lshortfile)
+}
+
 func main() {
 	cfg := config.LoadConfig()
-	userRepo := repositories.NewUserRepository(cfg.DatabaseURL)
-	userService := services.UserService(userRepo)
+	db := repositories.DBConnect(cfg.DatabaseURL)
+
+	userService := services.UserService(db)
 	userHandler := handlers.UserHandler(userService)
 
-	authService := services.AuthUserService(userRepo)
+	authService := services.AuthUserService(db)
 	authHandler := handlers.AuthUserHandler(authService)
 
 	router := gorillaMux.NewRouter()

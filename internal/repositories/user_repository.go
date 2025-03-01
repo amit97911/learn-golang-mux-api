@@ -2,33 +2,17 @@ package repositories
 
 import (
 	"database/sql"
+	"errors"
 	"learn-golang-mux-api/internal/models"
-
-	"log"
 )
 
-type UserRepository struct {
-	DB *sql.DB
-}
-
-func NewUserRepository(databaseUrl string) *UserRepository {
-	db, err := sql.Open("mysql", databaseUrl)
-	if err != nil {
-		log.Fatal("Failed to connect database!", err)
-	}
-	if err := db.Ping(); err != nil {
-		log.Fatalf("Failed to ping database: %v", err)
-	}
-	return &UserRepository{DB: db}
-}
-
-func (repo *UserRepository) CreateUser(user *models.UserWithPasswordStruct) error {
+func (repo *DatabaseConnection) CreateUser(user *models.UserWithPasswordStruct) error {
 	query := "INSERT INTO users (name, email,password) VALUES (?, ?, ?)"
 	_, err := repo.DB.Exec(query, user.Name, user.Email, user.Password)
 	return err
 }
 
-func (repo *UserRepository) GetUser(id uint) (*models.UserStruct, error) {
+func (repo *DatabaseConnection) GetUser(id uint) (*models.UserStruct, error) {
 	query := "SELECT id, name, email FROM users WHERE id = ?"
 	row := repo.DB.QueryRow(query, id)
 
@@ -40,7 +24,7 @@ func (repo *UserRepository) GetUser(id uint) (*models.UserStruct, error) {
 	return &user, nil
 }
 
-func (repo *UserRepository) GetAllUsers() ([]*models.UserStruct, error) {
+func (repo *DatabaseConnection) GetAllUsers() ([]*models.UserStruct, error) {
 	query := "SELECT id, name, email FROM users"
 	rows, err := repo.DB.Query(query)
 	if err != nil {
@@ -57,4 +41,20 @@ func (repo *UserRepository) GetAllUsers() ([]*models.UserStruct, error) {
 	}
 
 	return users, nil
+}
+
+func (repo *DatabaseConnection) AuthenticateUser(email, password string) (*string, error) {
+	var hashedPassword string
+
+	// Use a prepared statement to prevent SQL injection
+	query := "SELECT password FROM users WHERE email = ?"
+	row := repo.DB.QueryRow(query, email)
+	if err := row.Scan(&hashedPassword); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("Failed")
+		}
+		return nil, err
+	}
+	return &hashedPassword, nil
+
 }
