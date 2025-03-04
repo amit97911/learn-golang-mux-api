@@ -36,6 +36,7 @@ func main() {
 
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
 	userRouter.HandleFunc("/create", userHandler.CreateUser).Methods("POST")
+	userRouter.Use(middlewares.AuthMiddleware)
 	userRouter.HandleFunc("/id/{id}", userHandler.GetUser).Methods("GET")
 	userRouter.HandleFunc("/all", userHandler.GetAllUsers).Methods("GET")
 
