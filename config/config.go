@@ -19,22 +19,22 @@ func LoadConfig() *Config {
 	}
 
 	cfg := mysql.Config{
-		User:                 os.Getenv("DB_USER"),
-		Passwd:               os.Getenv("DB_PASS"),
+		User:                 GetEnv("DB_USER", "user"),
+		Passwd:               GetEnv("DB_PASS", "passs"),
 		Net:                  "tcp",
-		Addr:                 os.Getenv("DB_HOST") + ":" + os.Getenv("DB_PORT"),
-		DBName:               os.Getenv("DB_NAME"),
+		Addr:                 GetEnv("DB_HOST", "host") + ":" + GetEnv("DB_PORT", "3306"),
+		DBName:               GetEnv("DB_NAME", "dbname"),
 		AllowNativePasswords: true,
 	}
 	return &Config{
-		Port: getEnv("PORT", "8080"),
+		Port: GetEnv("PORT", "8080"),
 		// DatabaseURL: getEnv("DATABASE_URL", "username:password@tcp(localhost:3306)/database"),
 		DatabaseURL: cfg.FormatDSN(),
 	}
 }
 
 // getEnv retrieves environment variables or sets a default
-func getEnv(key, defaultValue string) string {
+func GetEnv(key, defaultValue string) string {
 	value, exists := os.LookupEnv(key)
 	if !exists {
 		return defaultValue

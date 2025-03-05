@@ -9,12 +9,46 @@ import (
 	"learn-golang-mux-api/pkg"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
+	"time"
 
 	gorillaHandlers "github.com/gorilla/handlers"
 	gorillaMux "github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+)
+
+var (
+	environment string
+	logDir      string = "storage/logs/development"
 )
 
 func init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	environment = config.GetEnv("ENVIRONMENT", "development")
+	if environment == "production" {
+		logDir = "storage/logs/production"
+	} else {
+		logDir = "storage/logs/development"
+	}
+
+	if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
+		log.Fatal("Failed to create log directory:", err)
+	}
+
+	currentDate := time.Now().Format("2006-01-02")
+	logFilename := filepath.Join(logDir, currentDate+".log")
+
+	file, err := os.OpenFile(logFilename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal("Failed to open log file:", err)
+	}
+
+	log.SetOutput(file)
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds | log.Lshortfile)
 }
 
