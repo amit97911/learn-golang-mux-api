@@ -56,11 +56,11 @@ func main() {
 	cfg := config.LoadConfig()
 	db := repositories.DBConnect(cfg.DatabaseURL)
 
-	userService := services.UserService(db)
-	userHandler := handlers.UserHandler(userService)
+	userService := services.NewUserService(db)
+	userHandler := handlers.NewUserHandler(userService)
 
-	authService := services.AuthUserService(db)
-	authHandler := handlers.AuthUserHandler(authService)
+	authService := services.NewAuthUserService(db)
+	authHandler := handlers.NewAuthUserHandler(authService)
 
 	router := gorillaMux.NewRouter()
 	apiRouter := router.PathPrefix("/api").Subrouter()

@@ -6,15 +6,18 @@ import (
 	"net/http"
 )
 
-type AuthUserHandlerStruct struct {
-	Service *services.AuthServiceStruct
+type AuthUserServiceStruct struct {
+	Service *services.AuthRepositoryStruct
 }
 
-func AuthUserHandler(service *services.AuthServiceStruct) *AuthUserHandlerStruct {
-	return &AuthUserHandlerStruct{Service: service}
+/**************************************************************************************/
+func NewAuthUserHandler(service *services.AuthRepositoryStruct) *AuthUserServiceStruct {
+	return &AuthUserServiceStruct{Service: service}
 }
 
-func (h *AuthUserHandlerStruct) Login(w http.ResponseWriter, r *http.Request) {
+/**************************************************************************************/
+
+func (serv *AuthUserServiceStruct) Login(w http.ResponseWriter, r *http.Request) {
 	var (
 		userInput struct {
 			Email    string `json:"email"`
@@ -34,7 +37,7 @@ func (h *AuthUserHandlerStruct) Login(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 	}
 
-	token, err = h.Service.HandleLogin(userInput.Email, userInput.Password)
+	token, err = serv.Service.HandleLogin(userInput.Email, userInput.Password)
 	if err != nil {
 		response = map[string]string{
 			"message": "Invalid email or password",

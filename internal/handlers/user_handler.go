@@ -11,16 +11,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserHandlerStruct struct {
-	Service *services.UserServiceStruct
+type UserServiceStruct struct {
+	Service *services.UserRepositoryStruct
 }
 
-func UserHandler(service *services.UserServiceStruct) *UserHandlerStruct {
-	return &UserHandlerStruct{Service: service}
+/**************************************************************************************/
+func NewUserHandler(serv *services.UserRepositoryStruct) *UserServiceStruct {
+	return &UserServiceStruct{Service: serv}
 }
 
-// CreateUser handles user creation
-func (h *UserHandlerStruct) CreateUser(w http.ResponseWriter, r *http.Request) {
+/**************************************************************************************/
+
+func (serv *UserServiceStruct) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user models.UserWithPasswordStruct
 
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -30,7 +32,7 @@ func (h *UserHandlerStruct) CreateUser(w http.ResponseWriter, r *http.Request) {
 	hash, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	user.Password = string(hash)
 
-	createdUser, err := h.Service.RegisterUser(user.Name, user.Email, user.Password)
+	createdUser, err := serv.Service.RegisterUser(user.Name, user.Email, user.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -49,7 +51,7 @@ func (h *UserHandlerStruct) CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetUser retrieves a user by ID
-func (h *UserHandlerStruct) GetUser(w http.ResponseWriter, r *http.Request) {
+func (serv *UserServiceStruct) GetUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
@@ -57,7 +59,7 @@ func (h *UserHandlerStruct) GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.Service.Repo.GetUser(uint(id))
+	user, err := serv.Service.Repository.GetUser(uint(id))
 	if err != nil {
 		http.Error(w, "User not found", http.StatusNotFound)
 		return
@@ -66,8 +68,8 @@ func (h *UserHandlerStruct) GetUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-func (h *UserHandlerStruct) GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := h.Service.GetAllUsers()
+func (serv *UserServiceStruct) GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := serv.Service.GetAllUsers()
 	if err != nil {
 		http.Error(w, "Failed to fetch users", http.StatusInternalServerError)
 		return

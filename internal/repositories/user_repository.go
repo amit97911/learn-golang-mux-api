@@ -6,15 +6,15 @@ import (
 	"learn-golang-mux-api/internal/models"
 )
 
-func (repo *DatabaseConnection) CreateUser(user *models.UserWithPasswordStruct) error {
+func (db *DatabaseConnection) CreateUser(user *models.UserWithPasswordStruct) error {
 	query := "INSERT INTO users (name, email,password) VALUES (?, ?, ?)"
-	_, err := repo.DB.Exec(query, user.Name, user.Email, user.Password)
+	_, err := db.DB.Exec(query, user.Name, user.Email, user.Password)
 	return err
 }
 
-func (repo *DatabaseConnection) GetUser(id uint) (*models.UserStruct, error) {
+func (db *DatabaseConnection) GetUser(id uint) (*models.UserStruct, error) {
 	query := "SELECT id, name, email FROM users WHERE id = ?"
-	row := repo.DB.QueryRow(query, id)
+	row := db.DB.QueryRow(query, id)
 
 	user := models.UserStruct{}
 	err := row.Scan(&user.ID, &user.Name, &user.Email)
@@ -24,9 +24,9 @@ func (repo *DatabaseConnection) GetUser(id uint) (*models.UserStruct, error) {
 	return &user, nil
 }
 
-func (repo *DatabaseConnection) GetAllUsers() ([]*models.UserStruct, error) {
+func (db *DatabaseConnection) GetAllUsers() ([]*models.UserStruct, error) {
 	query := "SELECT id, name, email FROM users"
-	rows, err := repo.DB.Query(query)
+	rows, err := db.DB.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -43,12 +43,11 @@ func (repo *DatabaseConnection) GetAllUsers() ([]*models.UserStruct, error) {
 	return users, nil
 }
 
-func (repo *DatabaseConnection) AuthenticateUser(email, password string) (*string, error) {
+func (db *DatabaseConnection) AuthenticateUser(email, password string) (*string, error) {
 	var hashedPassword string
-
 	// Use a prepared statement to prevent SQL injection
 	query := "SELECT password FROM users WHERE email = ?"
-	row := repo.DB.QueryRow(query, email)
+	row := db.DB.QueryRow(query, email)
 	if err := row.Scan(&hashedPassword); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("Failed")

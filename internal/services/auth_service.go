@@ -10,17 +10,20 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type AuthServiceStruct struct {
-	Repo *repositories.DatabaseConnection
+type AuthRepositoryStruct struct {
+	Repository *repositories.DatabaseConnection
 }
 
-func AuthUserService(repo *repositories.DatabaseConnection) *AuthServiceStruct {
-	return &AuthServiceStruct{Repo: repo}
+/**************************************************************************************/
+func NewAuthUserService(repo *repositories.DatabaseConnection) *AuthRepositoryStruct {
+	return &AuthRepositoryStruct{Repository: repo}
 }
 
-func (s *AuthServiceStruct) HandleLogin(email, password string) (*string, error) {
+/**************************************************************************************/
+
+func (repo *AuthRepositoryStruct) HandleLogin(email, password string) (*string, error) {
 	var token string
-	hashedPassword, err := s.Repo.AuthenticateUser(email, password)
+	hashedPassword, err := repo.Repository.AuthenticateUser(email, password)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve users: %w", err)
 	}
