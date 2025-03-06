@@ -1,6 +1,8 @@
 package middlewares
 
 import (
+	"learn-golang-mux-api/config"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -10,10 +12,17 @@ import (
 )
 
 func GenerateToken(email string) (string, error) {
-	secret := os.Getenv("JWT_SECRET")
+	secret := config.GetEnv("JWT_SECRET", "my_secret_key")
+	jwtTtl := config.GetEnv("JWT_TTL", "120")
+	ttlDuration, err := time.ParseDuration(jwtTtl + "m")
+
+	if err != nil {
+		log.Println("Failed to convert jwt ttl to duration")
+		panic(err)
+	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
-		"exp":   time.Now().Add(time.Hour * 2).Unix(),
+		"exp":   time.Now().Add(time.Minute * ttlDuration).Unix(),
 	})
 
 	return token.SignedString([]byte(secret))
