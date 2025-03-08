@@ -4,7 +4,6 @@ import (
 	"learn-golang-mux-api/config"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -42,7 +41,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		tokenStr := authHeaderParts[1]
-		secret := os.Getenv("JWT_SECRET")
+		secret := config.GetEnv("JWT_SECRET", "my_secret_key")
 
 		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (any, error) {
 			return []byte(secret), nil

@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"fmt"
 	"learn-golang-mux-api/internal/models"
 	"learn-golang-mux-api/internal/repositories"
@@ -19,9 +18,6 @@ func NewUserService(repo *repositories.DatabaseConnection) *UserRepositoryStruct
 /**************************************************************************************/
 
 func (repo *UserRepositoryStruct) RegisterUser(name, email, password string) (*models.UserWithPasswordStruct, error) {
-	if name == "" || email == "" || password == "" {
-		return nil, errors.New("name and email are required")
-	}
 
 	user := &models.UserWithPasswordStruct{Name: name, Email: email, Password: password}
 	err := repo.Repository.CreateUser(user)

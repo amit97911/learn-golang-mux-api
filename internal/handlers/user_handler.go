@@ -29,6 +29,15 @@ func (serv *UserServiceStruct) CreateUser(w http.ResponseWriter, r *http.Request
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
+
+	if user.Name == "" || user.Email == "" || user.Password == "" {
+		response := map[string]any{
+			"message": "name, email and password are required",
+		}
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
 	hash, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	user.Password = string(hash)
 
