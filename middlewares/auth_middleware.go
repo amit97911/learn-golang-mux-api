@@ -4,6 +4,7 @@ import (
 	"learn-golang-mux-api/config"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -13,15 +14,14 @@ import (
 func GenerateToken(email string) (string, error) {
 	secret := config.GetEnv("JWT_SECRET", "my_secret_key")
 	jwtTtl := config.GetEnv("JWT_TTL", "120")
-	ttlDuration, err := time.ParseDuration(jwtTtl + "m")
-
+	ttlMinutes, err := strconv.Atoi(jwtTtl)
 	if err != nil {
-		log.Println("Failed to convert jwt ttl to duration")
+		log.Println("Failed to convert jwt ttl to integer")
 		panic(err)
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
-		"exp":   time.Now().Add(time.Minute * ttlDuration).Unix(),
+		"exp":   time.Now().Add(time.Duration(ttlMinutes) * time.Minute).Unix(),
 	})
 
 	return token.SignedString([]byte(secret))
