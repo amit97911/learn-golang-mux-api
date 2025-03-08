@@ -23,7 +23,7 @@ func NewUserHandler(serv *services.UserRepositoryStruct) *UserServiceStruct {
 /**************************************************************************************/
 
 func (serv *UserServiceStruct) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var user models.UserWithPasswordStruct
+	var user models.UserStruct
 
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)

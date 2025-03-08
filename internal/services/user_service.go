@@ -17,14 +17,13 @@ func NewUserService(repo *repositories.DatabaseConnection) *UserRepositoryStruct
 
 /**************************************************************************************/
 
-func (repo *UserRepositoryStruct) RegisterUser(name, email, password string) (*models.UserWithPasswordStruct, error) {
-
-	user := &models.UserWithPasswordStruct{Name: name, Email: email, Password: password}
+func (repo *UserRepositoryStruct) RegisterUser(name, email, password string) (*models.UserStruct, error) {
+	user := &models.UserStruct{Name: name, Email: email, Password: password}
 	err := repo.Repository.CreateUser(user)
 	return user, err
 }
 
-func (repo *UserRepositoryStruct) GetAllUsers() ([]*models.UserStruct, error) {
+func (repo *UserRepositoryStruct) GetAllUsers() ([]*models.UserDetailsStruct, error) {
 	users, err := repo.Repository.GetAllUsers()
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve users: %w", err)

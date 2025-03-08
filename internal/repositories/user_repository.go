@@ -6,17 +6,17 @@ import (
 	"learn-golang-mux-api/internal/models"
 )
 
-func (db *DatabaseConnection) CreateUser(user *models.UserWithPasswordStruct) error {
+func (db *DatabaseConnection) CreateUser(user *models.UserStruct) error {
 	query := "INSERT INTO users (name, email,password) VALUES (?, ?, ?)"
 	_, err := db.DB.Exec(query, user.Name, user.Email, user.Password)
 	return err
 }
 
-func (db *DatabaseConnection) GetUser(id uint) (*models.UserStruct, error) {
+func (db *DatabaseConnection) GetUser(id uint) (*models.UserDetailsStruct, error) {
 	query := "SELECT id, name, email FROM users WHERE id = ?"
 	row := db.DB.QueryRow(query, id)
 
-	user := models.UserStruct{}
+	user := models.UserDetailsStruct{}
 	err := row.Scan(&user.ID, &user.Name, &user.Email)
 	if err != nil {
 		return nil, err
@@ -24,16 +24,16 @@ func (db *DatabaseConnection) GetUser(id uint) (*models.UserStruct, error) {
 	return &user, nil
 }
 
-func (db *DatabaseConnection) GetAllUsers() ([]*models.UserStruct, error) {
+func (db *DatabaseConnection) GetAllUsers() ([]*models.UserDetailsStruct, error) {
 	query := "SELECT id, name, email FROM users"
 	rows, err := db.DB.Query(query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var users []*models.UserStruct
+	var users []*models.UserDetailsStruct
 	for rows.Next() {
-		var user = &models.UserStruct{}
+		var user = &models.UserDetailsStruct{}
 		if err := rows.Scan(&user.ID, &user.Name, &user.Email); err != nil {
 			return users, err
 		}
