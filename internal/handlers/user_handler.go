@@ -23,7 +23,8 @@ func NewUserHandler(serv *services.UserRepositoryStruct) *UserServiceStruct {
 /**************************************************************************************/
 
 func (serv *UserServiceStruct) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var user models.UserStruct
+	var user *models.UserStruct
+	var userDet *models.UserDetailsStruct
 
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
@@ -41,18 +42,21 @@ func (serv *UserServiceStruct) CreateUser(w http.ResponseWriter, r *http.Request
 	hash, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	user.Password = string(hash)
 
-	createdUser, err := serv.Service.RegisterUser(user.Name, user.Email, user.Password)
+	createdUser, err := serv.Service.RegisterUser(user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	userDet = &models.UserDetailsStruct{
+		ID:    createdUser.ID,
+		Name:  createdUser.Name,
+		Email: createdUser.Email,
+	}
+
 	response := map[string]any{
 		"message": "User created",
-		"data": map[string]any{
-			"name":  createdUser.Name,
-			"email": createdUser.Email,
-		},
+		"data":    *userDet,
 	}
 
 	json.NewEncoder(w).Encode(response)

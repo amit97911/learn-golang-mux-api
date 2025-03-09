@@ -6,7 +6,6 @@ import (
 	"learn-golang-mux-api/internal/repositories"
 	"learn-golang-mux-api/internal/services"
 	"learn-golang-mux-api/middlewares"
-	"learn-golang-mux-api/pkg"
 	"log"
 	"net/http"
 	"os"
@@ -57,12 +56,15 @@ func main() {
 	db := repositories.DBConnect(cfg.DatabaseURL)
 
 	userService := services.NewUserService(db)
-	userHandler := handlers.NewUserHandler(userService)
-
 	authService := services.NewAuthUserService(db)
+	bookService := services.NewBookService(db)
+
+	userHandler := handlers.NewUserHandler(userService)
 	authHandler := handlers.NewAuthUserHandler(authService)
+	bookHandler := handlers.NewBookHandler(bookService)
 
 	router := gorillaMux.NewRouter()
+
 	apiRouter := router.PathPrefix("/api").Subrouter()
 
 	authRouter := apiRouter.PathPrefix("/auth").Subrouter()
@@ -76,15 +78,16 @@ func main() {
 	protectedUserRouter.HandleFunc("/id/{id}", userHandler.GetUser).Methods("GET")
 	protectedUserRouter.HandleFunc("/all", userHandler.GetAllUsers).Methods("GET")
 
-	// Method Not Allowed Handler
-	router.MethodNotAllowedHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("405 - Method Not Allowed"))
-	})
+	protectedBookRouter := apiRouter.PathPrefix("/book").Subrouter()
+	protectedBookRouter.Use(middlewares.AuthMiddleware)
+	protectedBookRouter.HandleFunc("/all", bookHandler.GetAllBooks).Methods("GET")
+	protectedBookRouter.HandleFunc("/id/{id}", bookHandler.GetBook).Methods("GET")
+	protectedBookRouter.HandleFunc("/create", bookHandler.CreateBook).Methods("POST")
+	protectedBookRouter.HandleFunc("/update", bookHandler.UpdateBook).Methods("PUT")
+	protectedBookRouter.HandleFunc("/delete/{id}", bookHandler.DeleteBook).Methods("DELETE")
 
 	port := cfg.Port
 	log.Println("Server started on :" + port)
 	log.Fatal(http.ListenAndServe(":"+port, gorillaHandlers.CORS()(router)))
 	middlewares.Middleware()
-	pkg.Utils()
 }

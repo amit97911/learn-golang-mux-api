@@ -17,8 +17,7 @@ func NewUserService(repo *repositories.DatabaseConnection) *UserRepositoryStruct
 
 /**************************************************************************************/
 
-func (repo *UserRepositoryStruct) RegisterUser(name, email, password string) (*models.UserStruct, error) {
-	user := &models.UserStruct{Name: name, Email: email, Password: password}
+func (repo *UserRepositoryStruct) RegisterUser(user *models.UserStruct) (*models.UserStruct, error) {
 	err := repo.Repository.CreateUser(user)
 	return user, err
 }
